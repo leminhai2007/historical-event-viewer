@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <title>Moon Landing</title>
+  <defs>
+    <linearGradient id="space" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#020a1c"/>
+      <stop offset="100%" stop-color="#0b2147"/>
+    </linearGradient>
+    <radialGradient id="moonGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#eef3f8"/>
+      <stop offset="70%" stop-color="#cfd8e3"/>
+      <stop offset="100%" stop-color="#aebbcb"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#space)"/>
+  <g fill="#fff">
+    <circle cx="120" cy="70" r="2" opacity="0.9"/>
+    <circle cx="260" cy="110" r="1.5" opacity="0.7"/>
+    <circle cx="520" cy="50" r="2.2" opacity="0.9"/>
+    <circle cx="640" cy="130" r="1.3" opacity="0.6"/>
+    <circle cx="740" cy="70" r="1.7" opacity="0.8"/>
+    <circle cx="90" cy="180" r="1.2" opacity="0.5"/>
+    <circle cx="700" cy="200" r="1.5" opacity="0.6"/>
+    <circle cx="350" cy="40" r="1.8" opacity="0.8"/>
+    <circle cx="460" cy="150" r="1.1" opacity="0.5"/>
+  </g>
+  <circle cx="490" cy="120" r="72" fill="#b0bec5" opacity="0.15"/>
+  <circle cx="490" cy="120" r="60" fill="url(#moonGlow)"/>
+  <g fill="#9aa8b8">
+    <circle cx="468" cy="104" r="10"/>
+    <circle cx="508" cy="96" r="7"/>
+    <circle cx="480" cy="136" r="8"/>
+    <circle cx="514" cy="130" r="5"/>
+    <ellipse cx="516" cy="150" rx="14" ry="6"/>
+    <ellipse cx="464" cy="150" rx="10" ry="4"/>
+  </g>
+  <g transform="translate(210,180)">
+    <path d="M0 0h34l28 40v120H0z" fill="#e8edf2" stroke="#b0bcc9" stroke-width="2"/>
+    <path d="M34 0v160 M34 40h39" fill="none" stroke="#9aa8b8" stroke-width="3"/>
+    <rect x="18" y="70" width="34" height="22" rx="4" fill="#4fc3f7"/>
+    <path d="M0 0l-26-26 M34 0l26-26" stroke="#8d9aa8" stroke-width="3" fill="none"/>
+    <path d="M-26-26 0 40 M26-26 34 40" stroke="#e63946" stroke-width="5"/>
+  </g>
+  <ellipse cx="260" cy="360" rx="460" ry="60" fill="#8b939e"/>
+  <ellipse cx="260" cy="352" rx="460" ry="52" fill="#a7b0ba"/>
+  <g fill="#8f99a4">
+    <circle cx="90" cy="342" r="10"/>
+    <circle cx="210" cy="336" r="8"/>
+    <circle cx="350" cy="344" r="12"/>
+    <circle cx="470" cy="338" r="9"/>
+  </g>
+</svg>
