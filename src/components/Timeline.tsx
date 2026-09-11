@@ -88,9 +88,9 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
   return (
     <div className="overflow-x-auto pb-8">
       <div
-        className="grid min-w-[680px]"
+        className="grid"
         style={{
-          gridTemplateColumns: `130px repeat(${selectedRegions.length}, minmax(170px, 1fr))`,
+          gridTemplateColumns: `130px repeat(${selectedRegions.length}, minmax(170px, 230px))`,
         }}
       >
         {/* Header row */}
@@ -124,7 +124,7 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
             {cells.map((cellEvents, ci) => (
               <div
                 key={ci}
-                className="px-3 py-2 min-h-[40px] flex flex-wrap gap-1.5 items-center justify-center"
+                className="px-3 py-2 min-h-[40px] flex flex-wrap gap-1.5 items-center justify-start"
               >
                 {cellEvents.map((event) => (
                   <EventCard

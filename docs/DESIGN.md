@@ -144,7 +144,11 @@ interface TimelineProps {
 ```
 
 **Behavior:**
-- Renders a CSS grid with `130px repeat(N, minmax(170px, 1fr))` columns.
+- Renders a CSS grid with `130px repeat(N, minmax(170px, 230px))` columns.
+  Region columns are capped at 230px so they sit close together instead of
+  stretching to fill the viewport; the grid no longer forces a 680px minimum,
+  so with a single region selected the timeline fits mobile widths without
+  horizontal scroll.
 - Column 1 is the date/timeline lane (monospace date + blue dot on a right
   border); columns 2..n+1 map to `selectedRegions` in order.
 - One row per unique event date; events that match multiple selected regions

@@ -17,8 +17,10 @@ export default function FloatingRegionPanel({
   const [search, setSearch] = useState("");
   const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isDragging, setIsDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  const userMoved = useRef(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (panelRef.current) {
@@ -34,6 +36,7 @@ export default function FloatingRegionPanel({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
+        userMoved.current = true;
         setPosition({
           x: e.clientX - dragOffset.current.x,
           y: e.clientY - dragOffset.current.y,
@@ -56,6 +59,33 @@ export default function FloatingRegionPanel({
     };
   }, [isDragging]);
 
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
+    const place = () => {
+      if (userMoved.current) return;
+      const container = document.querySelector<HTMLElement>("header .max-w-4xl");
+      const left = container ? container.getBoundingClientRect().left : 20;
+      if (left - 52 >= 12) {
+        setPosition({ x: left - 52, y: 20 });
+      } else {
+        const header = document.querySelector<HTMLElement>("header");
+        const bottom = header ? header.getBoundingClientRect().bottom : 88;
+        setPosition({ x: 12, y: bottom + 12 });
+      }
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [isMobile]);
+
   const toggleRegion = (region: string) => {
     const normalized = region.toLowerCase();
     if (selectedRegions.includes(normalized)) {
@@ -72,8 +102,8 @@ export default function FloatingRegionPanel({
   return (
     <div
       ref={panelRef}
-      className="fixed z-50"
-      style={{ left: position.x, top: position.y }}
+      className={`fixed z-50 ${isMobile ? "bottom-6 left-6" : ""}`}
+      style={isMobile ? undefined : { left: position.x, top: position.y }}
     >
       {!isOpen ? (
         <button
