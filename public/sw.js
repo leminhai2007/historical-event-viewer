@@ -1,4 +1,4 @@
-const CACHE_NAME = "history-viewer-v2";
+const CACHE_NAME = "history-viewer-v3";
 
 // Base directory so paths work both at the site root (dev) and
 // under a sub-path (e.g. GitHub Pages project site).
