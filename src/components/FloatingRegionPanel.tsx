@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { template, useLocale } from "@/components/LocaleProvider";
 
 interface FloatingRegionPanelProps {
   availableRegions: string[];
@@ -13,6 +14,7 @@ export default function FloatingRegionPanel({
   selectedRegions,
   onSelectionChange,
 }: FloatingRegionPanelProps) {
+  const { t, defaultRegions, regionLabel } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [position, setPosition] = useState({ x: 20, y: 20 });
@@ -87,11 +89,10 @@ export default function FloatingRegionPanel({
   }, [isMobile]);
 
   const toggleRegion = (region: string) => {
-    const normalized = region.toLowerCase();
-    if (selectedRegions.includes(normalized)) {
-      onSelectionChange(selectedRegions.filter((r) => r !== normalized));
+    if (selectedRegions.includes(region)) {
+      onSelectionChange(selectedRegions.filter((r) => r !== region));
     } else {
-      onSelectionChange([...selectedRegions, normalized]);
+      onSelectionChange([...selectedRegions, region]);
     }
   };
 
@@ -112,7 +113,7 @@ export default function FloatingRegionPanel({
             setIsOpen(true);
           }}
           className="w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-          aria-label="Open region filter"
+          aria-label={t["regions.open"]}
         >
           <svg
             className="w-6 h-6"
@@ -135,11 +136,11 @@ export default function FloatingRegionPanel({
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100 cursor-move">
-            <h3 className="font-semibold text-gray-900">Regions</h3>
+            <h3 className="font-semibold text-gray-900">{t["regions.title"]}</h3>
             <button
               onClick={() => setIsOpen(false)}
               className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
-              aria-label="Close panel"
+              aria-label={t["regions.close"]}
             >
               <svg
                 className="w-5 h-5 text-gray-500"
@@ -177,7 +178,7 @@ export default function FloatingRegionPanel({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search regions..."
+                placeholder={t["regions.search"]}
                 className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
                 aria-label="Search regions"
               />
@@ -188,11 +189,11 @@ export default function FloatingRegionPanel({
           <div className="p-4 max-h-64 overflow-y-auto">
             {availableRegions.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-4">
-                No regions available
+                {t["regions.none"]}
               </p>
             ) : filteredRegions.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-4">
-                No regions match &ldquo;{search}&rdquo;
+                {template(t["regions.noMatch"], { q: search })}
               </p>
             ) : (
               <div className="space-y-2">
@@ -207,8 +208,8 @@ export default function FloatingRegionPanel({
                       onChange={() => toggleRegion(region)}
                       className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700 capitalize">
-                      {region}
+                    <span className="text-sm text-gray-700">
+                      {regionLabel(region)}
                     </span>
                   </label>
                 ))}
@@ -223,13 +224,15 @@ export default function FloatingRegionPanel({
                 onClick={() => onSelectionChange(availableRegions)}
                 className="flex-1 px-3 py-1.5 text-xs text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
               >
-                Select All
+                {t["regions.selectAll"]}
               </button>
               <button
-                onClick={() => onSelectionChange(["world"])}
+                onClick={() => onSelectionChange(defaultRegions)}
                 className="flex-1 px-3 py-1.5 text-xs text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                Reset to World
+                {template(t["regions.reset"], {
+                  region: regionLabel(defaultRegions[0] ?? ""),
+                })}
               </button>
             </div>
           </div>

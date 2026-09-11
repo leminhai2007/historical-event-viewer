@@ -1,0 +1,12 @@
+{
+  "defaultLocale": "vi",
+  "localeOrder": ["vi", "en"],
+  "localeNames": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "defaultRegions": {
+    "vi": "Thế giới",
+    "en": "World"
+  }
+}

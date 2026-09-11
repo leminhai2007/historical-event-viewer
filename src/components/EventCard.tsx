@@ -4,6 +4,7 @@ import { ProcessedEvent } from "@/types/event";
 import Image from "next/image";
 import { EventAnchor } from "./EventTooltip";
 import { contentUrl } from "@/lib/paths";
+import { useLocale } from "@/components/LocaleProvider";
 
 interface EventCardProps {
   event: ProcessedEvent;
@@ -12,8 +13,9 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, isActive, onSelect }: EventCardProps) {
+  const { locale } = useLocale();
   const iconPath = event.metadata.icon
-    ? contentUrl(`icons/${event.metadata.icon}`)
+    ? contentUrl(locale, `icons/${event.metadata.icon}`)
     : null;
 
   return (

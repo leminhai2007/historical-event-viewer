@@ -10,8 +10,11 @@ import {
   parseDateFromFilename,
   sortDateKey,
 } from "./date";
+import { getConfig } from "./config";
 
-export const EVENTS_DIR = path.join(process.cwd(), "content", "events");
+export function eventsDir(locale: string): string {
+  return path.join(process.cwd(), "content", locale, "events");
+}
 
 export function extractTitleFromFilename(filename: string): string {
   const match = filename.match(/^-?\d{4}(?:\.\d{2})?(?:\.\d{2})?_(.+)\.md$/);
@@ -21,14 +24,15 @@ export function extractTitleFromFilename(filename: string): string {
   return filename.replace(/\.md$/, "");
 }
 
-export async function getAllEvents(): Promise<ProcessedEvent[]> {
-  if (!fs.existsSync(EVENTS_DIR)) return [];
+export async function getAllEvents(locale = "en"): Promise<ProcessedEvent[]> {
+  const dir = eventsDir(locale);
+  if (!fs.existsSync(dir)) return [];
 
-  const files = fs.readdirSync(EVENTS_DIR).filter((f) => f.endsWith(".md"));
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
 
   const events: ProcessedEvent[] = await Promise.all(
     files.map(async (filename) => {
-      const filePath = path.join(EVENTS_DIR, filename);
+      const filePath = path.join(dir, filename);
       const fileContent = fs.readFileSync(filePath, "utf-8");
       const { data, content } = matter(fileContent);
 
@@ -57,13 +61,15 @@ export async function getAllEvents(): Promise<ProcessedEvent[]> {
           icon: data.icon,
           image: data.image,
           tags: {
-            region: data.tags?.region || ["world"],
+            region: data.tags?.region?.length
+              ? data.tags.region
+              : [getConfig().defaultRegions[locale] ?? "World"],
             people: data.tags?.people || [],
           },
         },
         content,
         dateSortKey: sortDateKey(date),
-        displayDate: formatDateDisplay(date),
+        displayDate: formatDateDisplay(date, locale),
         serializedContent,
       };
     })

@@ -5,33 +5,38 @@ import { ProcessedEvent } from "@/types/event";
 import EventCard from "./EventCard";
 import EventTooltip, { EventAnchor } from "./EventTooltip";
 import { formatDateDisplay, sortDateKey } from "@/lib/date";
+import { useLocale } from "@/components/LocaleProvider";
 
 interface TimelineProps {
   events: ProcessedEvent[];
   selectedRegions: string[];
 }
 
-const regionDotColors: Record<string, string> = {
-  world: "bg-blue-500",
-  europe: "bg-emerald-500",
-  asia: "bg-amber-500",
-  "north-america": "bg-red-500",
-  "south-america": "bg-orange-500",
-  africa: "bg-yellow-500",
-  oceania: "bg-cyan-500",
-  space: "bg-purple-500",
-};
+const regionDotColors: string[] = [
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-red-500",
+  "bg-orange-500",
+  "bg-yellow-500",
+  "bg-cyan-500",
+  "bg-purple-500",
+  "bg-pink-500",
+  "bg-teal-500",
+];
 
 function getRegionDotColor(region: string): string {
-  const key = region.toLowerCase();
-  return regionDotColors[key] || "bg-gray-500";
-}
-
-function formatKey(key: string): string {
-  return formatDateDisplay(key);
+  const s = region.toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = (hash << 5) - hash + s.charCodeAt(i);
+    hash |= 0;
+  }
+  return regionDotColors[Math.abs(hash) % regionDotColors.length];
 }
 
 export default function Timeline({ events, selectedRegions }: TimelineProps) {
+  const { locale, t, regionLabel } = useLocale();
   const [active, setActive] = useState<{
     event: ProcessedEvent;
     anchor: EventAnchor;
@@ -79,8 +84,8 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <p className="text-lg">No events found</p>
-        <p className="text-sm">Try selecting different regions</p>
+        <p className="text-lg">{t["empty.title"]}</p>
+        <p className="text-sm">{t["empty.body"]}</p>
       </div>
     );
   }
@@ -103,8 +108,8 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
             <span
               className={`w-2 h-2 rounded-full ${getRegionDotColor(region)}`}
             />
-            <span className="text-sm font-semibold text-gray-700 capitalize">
-              {region}
+            <span className="text-sm font-semibold text-gray-700">
+              {regionLabel(region)}
             </span>
           </div>
         ))}
@@ -115,7 +120,7 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
             {/* Date cell (timeline column) */}
             <div className="relative border-r border-gray-200 py-2.5 pr-4 text-right">
               <span className="text-xs font-mono text-gray-600">
-                {formatKey(key)}
+                {formatDateDisplay(key, locale)}
               </span>
               <span className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-3 h-3 rounded-full bg-blue-500 border-2 border-white shadow" />
             </div>

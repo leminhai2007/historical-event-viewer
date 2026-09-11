@@ -5,6 +5,7 @@ import { ProcessedEvent } from "@/types/event";
 import Image from "next/image";
 import MDXContent from "./MDXContent";
 import { contentUrl } from "@/lib/paths";
+import { useLocale } from "@/components/LocaleProvider";
 
 export interface EventAnchor {
   left: number;
@@ -19,8 +20,9 @@ interface EventTooltipProps {
 }
 
 export default function EventTooltip({ event, anchor, onClose }: EventTooltipProps) {
+  const { locale, t, regionLabel } = useLocale();
   const imagePath = event.metadata.image
-    ? contentUrl(`images/${event.metadata.image}`)
+    ? contentUrl(locale, `images/${event.metadata.image}`)
     : null;
 
   const panelRef = useRef<HTMLDivElement>(null);
@@ -75,7 +77,7 @@ export default function EventTooltip({ event, anchor, onClose }: EventTooltipPro
           type="button"
           onClick={onClose}
           className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
-          aria-label="Close"
+          aria-label={t["tooltip.close"]}
         >
           <svg
             className="w-4 h-4 text-gray-500"
@@ -123,7 +125,7 @@ export default function EventTooltip({ event, anchor, onClose }: EventTooltipPro
                 key={region}
                 className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full"
               >
-                {region}
+                {regionLabel(region)}
               </span>
             ))}
           </div>
@@ -131,7 +133,7 @@ export default function EventTooltip({ event, anchor, onClose }: EventTooltipPro
           {event.metadata.tags.people &&
             event.metadata.tags.people.length > 0 && (
               <div className="mt-2">
-                <p className="text-xs text-gray-500 mb-1">People:</p>
+                <p className="text-xs text-gray-500 mb-1">{t["regions.people"]}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {event.metadata.tags.people.map((person) => (
                     <span

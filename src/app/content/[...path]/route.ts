@@ -24,15 +24,24 @@ function walk(dir: string): string[] {
 }
 
 export function generateStaticParams() {
-  const roots = fs
+  const localeDirs = fs
     .readdirSync(CONTENT_DIR, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
+    .filter(
+      (entry) =>
+        entry.isDirectory() &&
+        !entry.name.startsWith(".") &&
+        entry.name !== "events" &&
+        entry.name !== "icons" &&
+        entry.name !== "images"
+    )
     .map((entry) => path.join(CONTENT_DIR, entry.name));
 
-  return roots.flatMap((root) =>
+  return localeDirs.flatMap((root) =>
     walk(root)
       .filter((file) => MIME_TYPES[path.extname(file).toLowerCase()])
-      .map((file) => ({ path: path.relative(CONTENT_DIR, file).split(path.sep) }))
+      .map((file) => ({
+        path: path.relative(CONTENT_DIR, file).split(path.sep),
+      }))
   );
 }
 

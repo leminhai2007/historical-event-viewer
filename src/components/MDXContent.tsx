@@ -2,17 +2,19 @@
 
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { basePath, contentUrl } from "@/lib/paths";
+import { useLocale } from "@/components/LocaleProvider";
 
-function resolveImageSrc(src: string): string {
+function resolveImageSrc(locale: string, src: string): string {
   if (/^(https?:)?\/\//i.test(src)) return src;
   if (src.startsWith("/")) return `${basePath}${src}`;
   const normalized = src.startsWith("images/") ? src.slice("images/".length) : src;
-  return contentUrl(`images/${normalized}`);
+  return contentUrl(locale, `images/${normalized}`);
 }
 
-const mdxComponents = {
+function buildMdxComponents(locale: string) {
+return {
   img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
-    const resolvedSrc = resolveImageSrc(typeof src === "string" ? src : "");
+    const resolvedSrc = resolveImageSrc(locale, typeof src === "string" ? src : "");
     return (
       <figure className="my-6">
         <img
@@ -80,11 +82,13 @@ const mdxComponents = {
     </pre>
   ),
 };
+}
 
 export default function MDXContent({
   serialized,
 }: {
   serialized: MDXRemoteSerializeResult;
 }) {
-  return <MDXRemote {...serialized} components={mdxComponents} />;
+  const { locale } = useLocale();
+  return <MDXRemote {...serialized} components={buildMdxComponents(locale)} />;
 }

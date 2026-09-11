@@ -33,47 +33,58 @@ itself when you change a file, so keep the terminal running and just refresh.
 
 ## Add or edit an event (you don't need to be a developer)
 
-All the content lives in the **`content/events/`** folder. Each event is one
-text file that looks like this:
+The site is bilingual (**Vietnamese** is the default, **English** is
+available via the language switcher). Each language has its own content
+folder under **`content/`**: `content/vi/` for Vietnamese and `content/en/`
+for English. Each event is one text file in that language's `events/` folder:
 
 ```md
 ---
-title: "Moon Landing"
+title: "Hạ cánh lên Mặt Trăng"
 date: "1969-07-20"
 icon: "rocket.svg"
 image: "moon-landing.svg"
 tags:
-  region: ["world", "space"]
+  region: ["Thế giới", "Không gian"]
   people: ["Neil Armstrong", "Buzz Aldrin"]
 ---
 
-Apollo 11 was the spaceflight that first landed humans on the Moon.
+Chuyến bay Apollo 11 là chuyến bay vũ trụ đầu tiên đưa con người lên Mặt Trăng.
 
-![Apollo 11 lifting off](moon-landing.svg)
+![Apollo 11 cất cánh](moon-landing.svg)
 ```
 
 ### Rules
 
+- **Language folder:** put the file in `content/vi/events/` for Vietnamese
+  or `content/en/events/` for English. Icons and images go in the matching
+  `content/<language>/icons/` and `content/<language>/images/` folders.
 - **File name:** start with the date, then an underscore and the event name,
   for example `1969-07-20_MoonLanding.md`. Dates use `YYYY.MM.DD`.
-- **`title`** — the name shown on the event card.
+- **`title`** — the name shown on the event card, in that language.
 - **`date`** — the event date, in quotes, with dashes (`1969-07-20`).
   For events before year 1, use a **negative year**: 44 BCE is
   `"-0044-03-15"` and the file is `-0044.03.15_JuliusCaesarAssassination.md`.
-  These are shown as "44 BCE" on the timeline and appear before
-  CE events.
+  These are shown as "44 BCE" (or "44 TCN" in Vietnamese) on the timeline and
+  appear before CE events.
 - **`icon`** — a small picture used on the card. The file goes in the
-  **`content/icons/`** folder.
+  `content/<language>/icons/` folder.
 - **`image`** — (optional) a bigger picture shown in the event popup. The file
-  goes in the **`content/images/`** folder.
-- **`tags.region`** — at least one region name. Events from the same region
-  appear in the same column. You can invent new region names.
+  goes in the `content/<language>/images/` folder.
+- **`tags.region`** — at least one region name, written as the **display name
+  with accents** exactly as it should appear in the region list (e.g.
+  `Thế giới`, `Châu Âu`, `Bắc Mỹ` in Vietnamese; `World`, `Europe`,
+  `North America` in English). Events from the same region appear in the same
+  column. The region list is built automatically by scanning every event file
+  in that language — the site reads all `.md` files to know which regions to
+  offer. You can invent new region names inside a language.
 - **`tags.people`** — (optional) names of the people involved.
-- **The body** — the description, written in plain Markdown.
+- **The body** — the description, written in plain Markdown, in that language.
 
-The easiest way to start is to **copy an existing event file** and change the
-details. To preview, start the dev server (see above) and refresh the page.
-Pictures, icons, and event files are all just normal files in this repository.
+The easiest way to start is to **copy an existing event file** in the same
+language and change the details. To preview, start the dev server (see above)
+and refresh the page. Pictures, icons, and event files are all just normal
+files in this repository.
 
 ---
 
@@ -82,8 +93,9 @@ Pictures, icons, and event files are all just normal files in this repository.
 This project uses a **Pull Request** workflow so every change is checked by
 someone before it goes live.
 
-1. **Make your changes** — add or edit the event files in `content/events/`
-   (and any icons or images in `content/icons/` / `content/images/`).
+1. **Make your changes** — add or edit the event files in
+   `content/<language>/events/` (and any icons or images in that language's
+   `content/<language>/icons/` / `content/<language>/images/` folders).
 2. **Create a pull request (PR)** — this asks for your changes to be added to
    the `main` branch.
 3. **Someone reviews it** — a reviewer looks over the change, asks questions
@@ -112,13 +124,32 @@ The site is a static export run through GitHub Pages:
 
   The result appears in the `out/` folder.
 
+## Add a new language
+
+Each language is a folder under `content/` plus an entry in
+`content/config.json` — no code changes needed.
+
+1. Create `content/<locale>/events/`, `content/<locale>/icons/`,
+   `content/<locale>/images/` and translate/copy the event files.
+2. In `content/config.json`:
+   - `defaultLocale` — which language builds at `/` (change with care).
+   - `localeOrder` — add the new locale; other locales build at `/<locale>/`
+     (e.g. `/en/`).
+   - `localeNames` — display label used in the language switcher.
+   - `defaultRegions` — map of locale → the region name that is selected by
+     default for new visitors (same shape as `localeNames`, e.g.
+     `{ "vi": "Thế giới", "en": "World" }`). Use names exactly as written in
+     that language's event files.
+3. UI chrome strings (header, footer, etc.) live in `src/lib/i18n.ts` — add a
+   dictionary entry for the new locale.
+
 ## Project layout (short version)
 
 ```
-content/events/    ← every event lives here (one .md file each)
-content/icons/     ← small card icons
-content/images/    ← bigger pictures used in event popups
-public/            ← website icons, manifest, service worker
-src/               ← the website's code (React/Next.js)
-.github/workflows/ ← automatic build + deploy to GitHub Pages
+content/config.json     ← locale config (default language, default region per locale)
+content/vi/             ← Vietnamese content (default locale): events/ icons/ images/
+content/en/             ← English content: events/ icons/ images/
+public/                 ← website icons, manifest, service worker
+src/                    ← the website's code (React/Next.js)
+.github/workflows/      ← automatic build + deploy to GitHub Pages
 ```

@@ -55,12 +55,22 @@ export function sortDateKey(dateStr: string): number {
   return parts.bce ? -base : base;
 }
 
-export function formatDateDisplay(dateStr: string): string {
+const ERA_LABELS: Record<string, { bce: string; unknown: string }> = {
+  vi: { bce: "TCN", unknown: "Ngày không rõ" },
+  en: { bce: "BCE", unknown: "Unknown Date" },
+};
+
+function eraLabel(locale: string): { bce: string; unknown: string } {
+  return ERA_LABELS[locale] ?? ERA_LABELS.en!;
+}
+
+export function formatDateDisplay(dateStr: string, locale = "en"): string {
+  const era = eraLabel(locale);
   const parts = parseDateParts(dateStr);
-  if (!parts) return dateStr || "Unknown Date";
+  if (!parts) return dateStr || era.unknown;
   const p = (n: number) => String(n).padStart(2, "0");
   const yearLabel = parts.bce
-    ? `${Math.abs(parts.year)} BCE`
+    ? `${Math.abs(parts.year)} ${era.bce}`
     : String(parts.year).padStart(4, "0");
   if (parts.month === 1 && parts.day === 1) return yearLabel;
   if (parts.day === 1) return `${yearLabel} ${p(parts.month)}`;

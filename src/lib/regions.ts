@@ -1,15 +1,23 @@
 import { ProcessedEvent } from "@/types/event";
 
-export function extractUniqueRegions(events: ProcessedEvent[]): string[] {
-  const regionSet = new Set<string>();
+export function extractUniqueRegions(
+  events: ProcessedEvent[],
+  locale?: string
+): string[] {
+  const seen = new Map<string, string>();
 
   events.forEach((event) => {
     event.metadata.tags.region.forEach((region) => {
-      regionSet.add(region.toLowerCase());
+      const normalized = region.trim();
+      if (!normalized) return;
+      const key = normalized.toLowerCase();
+      if (!seen.has(key)) seen.set(key, normalized);
     });
   });
 
-  return Array.from(regionSet).sort();
+  return Array.from(seen.values()).sort((a, b) =>
+    a.localeCompare(b, locale ?? undefined)
+  );
 }
 
 export function filterEventsByRegions(

@@ -3,10 +3,10 @@
 ## Overview
 
 A responsive Progressive Web App (PWA) that renders historical events as a
-multi-column timeline. Events are stored as Markdown files in
-`content/events/`, one file per event. Users pick which regions to display;
-each selected region becomes its own column. Clicking an event card opens a
-detail modal.
+multi-column timeline. Content is **localized by language folders**:
+`content/<locale>/` holds that language's `events/`, `icons/`, and `images/`.
+Users pick which regions to display; each selected region becomes its own
+column. Clicking an event card opens a detail modal.
 
 ## Technology Stack
 
@@ -35,25 +35,37 @@ historical-event-viewer/
 │   ├── sw.js                    # Service worker (offline caching)
 │   └── favicon.ico
 ├── content/
-│   ├── events/                  # Markdown event files (YYYY.MM.DD_Name.md)
-│   ├── icons/                   # Event icons (SVG) — served at /content/icons/
-│   └── images/                  # Event images (SVG) — served at /content/images/
+│   ├── config.json               # locale config (default, order, names, region labels)
+│   ├── vi/                       # Vietnamese content (default locale)
+│   │   ├── events/               # Markdown event files (YYYY.MM.DD_Name.md)
+│   │   ├── icons/                # Event icons (SVG)
+│   │   └── images/               # Event images (SVG)
+│   └── en/                       # English content
+│       ├── events/
+│       ├── icons/
+│       └── images/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx           # Root layout: fonts, PWA meta, SW registration
-│   │   ├── page.tsx             # Server Component: loads + serializes events
-│   │   ├── content/[...path]/route.ts  # Serves files from content/ (icons, images)
-│   │   └── globals.css          # Tailwind + custom styles/animations
+│   │   ├── layout.tsx            # Root layout: fonts, PWA meta, LocaleProvider
+│   │   ├── page.tsx              # Server Component for the default locale (`/`)
+│   │   ├── [locale]/page.tsx     # Server Component for other locales (`/en/`)
+│   │   ├── content/[...path]/route.ts  # Serves files from content/<locale>/ (icons, images)
+│   │   └── globals.css           # Tailwind + custom styles/animations
 │   ├── components/
-│   │   ├── TimelineApp.tsx       # Client shell: region state + persistence
+│   │   ├── LocaleProvider.tsx    # Resolves locale, provides useLocale/useT/useRegionLabel
+│   │   ├── TimelineApp.tsx       # Client shell: region state + persistence + switcher
 │   │   ├── Timeline.tsx          # Column-grid timeline table
 │   │   ├── EventCard.tsx         # Compact round card (click to open details)
 │   │   ├── EventTooltip.tsx      # Click-to-open detail modal
-│   │   ├── MDXContent.tsx        # Client MDX renderer (+ image path resolution)
+│   │   ├── MDXContent.tsx        # Client MDX renderer (+ localized image paths)
 │   │   ├── FloatingRegionPanel.tsx # Draggable region picker w/ search
 │   │   └── PwaSupport.tsx        # SW registration + install prompt button
 │   ├── lib/
-│   │   ├── events.ts             # MD parsing + MDX serialization
+│   │   ├── config.ts             # Loads content/config.json (cached)
+│   │   ├── i18n.ts               # UI string dictionaries per locale
+│   │   ├── events.ts             # Locale-aware MD parsing + MDX serialization
+│   │   ├── date.ts               # Locale-aware date parsing/formatting (TCN/BCE)
+│   │   ├── paths.ts              # Locale content URL helpers (contentUrl)
 │   │   └── regions.ts            # Region extraction/filtering helpers
 │   └── types/
 │       └── event.ts              # TypeScript interfaces
@@ -93,10 +105,10 @@ BCE events use a **negative, zero-padded year**: `date: "-0044-03-15"` =
 44 BCE (year is the BCE number; there is no year 0 — 0 becomes 1 BCE). The
 file name mirrors it: `-0044.03.15_JuliusCaesarAssassination.md`. Dates are
 sorted by a numeric key (`yyyymmdd`, negative for BCE), not by `Date`.
-icon: "rocket.svg"                       # Optional: file in content/icons/
-image: "moon-landing.svg"                # Optional: file in content/images/
+icon: "rocket.svg"                       # Optional: file in content/<locale>/icons/
+image: "moon-landing.svg"                # Optional: file in content/<locale>/images/
 tags:
-  region: ["world", "space"]             # Required: at least one region
+  region: ["World", "Space"]                # Required: display names as authored
   people: ["Neil Armstrong"]             # Optional: related people
 ---
 ```
@@ -105,26 +117,79 @@ tags:
 
 Standard Markdown rendered below the frontmatter. Images referenced by bare
 filename (e.g. `![Alt](moon-landing.svg)`) are resolved to
-`/content/images/<filename>` by `MDXContent`. Full URLs and `/`-prefixed
-paths are left untouched. Event icons/images live under `content/` (not
-`public/`) and are served by the catch-all route handler
-`src/app/content/[...path]/route.ts`. Use the opencode command `/create-event`
-to scaffold a new event from a document, URL, or pasted text.
+`content/<locale>/images/<filename>` by `MDXContent`. Full URLs and
+`/`-prefixed paths are left untouched. Event icons/images live under
+`content/<locale>/` (not `public/`) and are served by the catch-all route
+handler `src/app/content/[...path]/route.ts`, whose first path segment selects
+the locale. Use the opencode command `/create-event` to scaffold a new event
+from a document, URL, or pasted text.
+
+## Internationalization
+
+### Configuration (`content/config.json`)
+
+```json
+{
+  "defaultLocale": "vi",
+  "localeOrder": ["vi", "en"],
+  "localeNames": { "vi": "Tiếng Việt", "en": "English" },
+  "defaultRegions": { "vi": "Thế giới", "en": "World" }
+}
+```
+
+- `defaultLocale` — built at `/`, no prefix (matches the `html lang` in the
+  root layout).
+- `localeOrder` — other locales build at `/<locale>/` via
+  `generateStaticParams` in `src/app/[locale]/page.tsx`.
+- `localeNames` — display labels used in the language switcher.
+- `defaultRegions` — same shape as `localeNames`: a map of locale → the region
+  name selected by default for that language (written exactly as it appears
+  in that language's event files).
+- **Region labels are NOT configured here.** Region names are authored directly
+  in each event file's `tags.region` (display form, e.g. `"Thế giới"` /
+  `"World"`). The site reads through every `.md` file of a locale to build the
+  region selector list.
+- `src/lib/config.ts` reads this at build time (server-side, cached; the
+  client shell also passes relevant bits through). Adding a language means
+  adding a `content/<locale>/` folder and a config entry — no code changes.
+
+### Locale plumbing
+
+- `src/components/LocaleProvider.tsx` (client) resolves the locale from the
+  `pathname` (`"/"` → default), syncs `document.documentElement.lang`, and
+  exposes `useLocale()`, `useT()` (UI strings), `useRegionLabel()`, and
+  `useLocaleHref()`. `useRegionLabel()` is an identity pass-through — a region
+  **is** its display name.
+- UI chrome (header, footer, install text, labels) sources its wording from
+  `src/lib/i18n.ts` dictionaries; era suffixes come from locale (vi → `TCN`,
+  en → `BCE`) in `src/lib/date.ts`.
+- The region selector list is computed on the client by scanning every event
+  file of the locale (`extractUniqueRegions` in `src/lib/regions.ts`), which
+  dedupes case-insensitively while preserving the first-seen authored spelling.
+- Region selection is persisted **per locale** under
+  `historical-viewer-regions:<locale>` so switching languages keeps each
+  language's own columns.
+- Metadata (`generateMetadata`, `src/app/page.tsx` + `[locale]/page.tsx`)
+  localizes the `<title>` per locale.
 
 ## Rendering Architecture
 
 ```
-content/events/*.md
+content/<locale>/events/*.md
    │  gray-matter + next-mdx-remote/serialize (rehype-unwrap-images)
    ▼
-src/lib/events.ts  ──►  ProcessedEvent[] (server, build time / static)
+src/lib/events.ts  ──►  ProcessedEvent[] (server, build time / static, per locale)
    │
    ▼
-src/app/page.tsx (Server Component)
+src/app/page.tsx    (default locale)   ─┐
+src/app/[locale]/page.tsx (other)      ─┴─ Server Component
+   │
+   ▼
+src/components/LocaleProvider.tsx (client context: locale, t, region names)
    │
    ▼
 <TimelineApp/> (client)
-   ├── selectedRegions state (localStorage persisted)
+   ├── selectedRegions state (localStorage, per-locale key)
    ├── <Timeline events filteredByRegions/>
    │     └── CSS grid: column 1 = dates, column n = selected region n
    │           └── <EventCard/> → onClick → <EventTooltip/> (modal)
@@ -154,7 +219,9 @@ interface TimelineProps {
 - One row per unique event date; events that match multiple selected regions
   appear in each matching column.
 - Horizontally scrollable when there are more columns than fit the viewport.
-- Header row shows the region name + colored dot for each column.
+- Header row shows the region name + colored dot for each column. Dot colors
+  are assigned deterministically from a hash of the region name (region names
+  are free-form display strings, so there is no slug → color mapping).
 
 **Grid keys** use the raw `metadata.date` string (e.g. `1989-11-09` or
 `-0044-03-15`) to avoid timezone shifts from `Date` parsing; unique keys are
@@ -217,14 +284,25 @@ interface FloatingRegionPanelProps {
 - Contains a **search box** that filters the region list live
   (case-insensitive substring). Shows "No regions match ..." when empty.
 - Only regions declared in event frontmatter are listed (no custom regions).
-- Quick actions: **Select All** (all available regions) and **Reset to World**.
+- Quick actions: **Select All** (all available regions) and **Reset to
+  Default** (this locale's `defaultRegions`), labels localized.
+- **Placement:** mobile (< 640px) is a fixed bottom-left circular button.
+  Desktop (≥ 1024px) anchors itself to the left of the page title (12px gap)
+  once the header is measured; at 640–1023px it tucks below the header.
+  A `userMoved` flag (set on drag) stops it from re-anchoring.
 
 ### 5. TimelineApp (`TimelineApp.tsx`)
 
-- Default selection `["world"]`, persisted to localStorage under
-  `historical-viewer-regions`.
-- On mount, saved selections are filtered against currently available regions.
-- Header shows the number of visible events and the selected regions.
+- Rendered inside `LocaleProvider`; reads the locale via `useLocale()`.
+- Default selection comes from `config.locales[locale].defaultRegions`, and is
+  persisted to localStorage under `historical-viewer-regions:<locale>`.
+- On mount, saved selections are filtered against currently available regions
+  of that locale.
+- The footer holds the **language switcher**: a localized `<select>` (Native
+  language names). Changing it navigates to `/<locale>/` — the raw href is
+  built from `NEXT_PUBLIC_BASE_PATH` + locale because `window.location`
+  navigation does not auto-prepend Next's `basePath` (unlike `<Link>`).
+- Also hosts `PwaSupport` (needs the provider context).
 
 ## Data Flow & State
 
@@ -233,21 +311,25 @@ interface FloatingRegionPanelProps {
 - Modal open state (`active`) lives in `Timeline`.
 
 ```typescript
-// Persistence
-const STORAGE_KEY = "historical-viewer-regions";
-// default: ["world"]
+// Persistence (per locale)
+const STORAGE_KEY = (locale: string) => `historical-viewer-regions:${locale}`;
+// default: config.locales[locale].defaultRegions
 ```
 
 ## PWA
 
 - `public/manifest.json` — app name, standalone display, icon set
-  (any + maskable), theme color `#3b82f6`.
-- `src/components/PwaSupport.tsx` (production only):
+  (any + maskable), theme color `#3b82f6`. Its `id`, `start_url`, and `scope`
+  are the path-relative value `"."` so an installed app opens the site's own
+  subpath (`https://<user>.github.io/<repo>/`) instead of the profile root.
+- `src/components/PwaSupport.tsx` (production only, rendered by
+  `TimelineApp`):
   - Registers `/sw.js` on load.
   - Listens for `beforeinstallprompt` and shows an install button;
     hides it once the PWA is installed (`appinstalled`).
 - `public/sw.js`:
-  - Pre-caches the app shell (`/`, manifest, `/pwa/*` icons) at install.
+  - Pre-caches the app shell (the locale URLs `/` and `/en/`, manifest,
+    `/pwa/*` icons) at install.
   - Navigation requests: network-first, falling back to the cached shell.
   - Same-origin assets (`/_next/*`, `/content/*`, `/pwa/*`):
     stale-while-revalidate.

@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import PwaSupport from "@/components/PwaSupport";
+import { LocaleProvider } from "@/components/LocaleProvider";
 import "./globals.css";
+import { getConfig } from "@/lib/config";
 import { basePath, pwaUrl } from "@/lib/paths";
+
+const config = getConfig();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,7 +62,7 @@ export default function RootLayout({
 }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang={config.defaultLocale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
@@ -69,8 +72,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        {children}
-        <PwaSupport />
+        <LocaleProvider config={config}>{children}</LocaleProvider>
       </body>
     </html>
   );

@@ -5,10 +5,22 @@ import { getStrings } from "@/lib/i18n";
 import TimelineApp from "@/components/TimelineApp";
 
 export const dynamic = "force-static";
+export const dynamicParams = false;
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { defaultLocale } = getConfig();
-  const t = getStrings(defaultLocale);
+export function generateStaticParams() {
+  const config = getConfig();
+  return config.localeOrder
+    .filter((locale) => locale !== config.defaultLocale)
+    .map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = getStrings(locale);
   return {
     title: t["app.title"],
     description: t["app.tagline"],
@@ -23,9 +35,12 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Home() {
-  const config = getConfig();
-  const locale = config.defaultLocale;
+export default async function LocalePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const events = await getAllEvents(locale);
 
   return <TimelineApp locale={locale} events={events} />;
