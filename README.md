@@ -58,6 +58,10 @@ Apollo 11 was the spaceflight that first landed humans on the Moon.
   for example `1969-07-20_MoonLanding.md`. Dates use `YYYY.MM.DD`.
 - **`title`** — the name shown on the event card.
 - **`date`** — the event date, in quotes, with dashes (`1969-07-20`).
+  For events before year 1, use a **negative year**: 44 BCE is
+  `"-0044-03-15"` and the file is `-0044.03.15_JuliusCaesarAssassination.md`.
+  These are shown as "44 BCE" on the timeline and appear before
+  CE events.
 - **`icon`** — a small picture used on the card. The file goes in the
   **`content/icons/`** folder.
 - **`image`** — (optional) a bigger picture shown in the event popup. The file

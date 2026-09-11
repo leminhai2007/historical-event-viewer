@@ -23,7 +23,7 @@ $ARGUMENTS
    | Flag | Example | Notes |
    |------|---------|-------|
    | `--title` | `--title "Wright Flyer"` | Override auto-detected title |
-   | `--date` | `--date 1903-12-17` | Also accepts `YYYY.MM.DD` or bare `YYYY` |
+   | `--date` | `--date 1903-12-17` | Also accepts `YYYY.MM.DD`, bare `YYYY`, or BCE (see step 3) |
    | `--region` | `--region world` | Repeatable; lowercase; default `world` |
    | `--people` | `--people "Neil Armstrong"` | Repeatable |
    | `--icon` | `--icon rocket.svg` | Filename in content/icons/ |
@@ -33,17 +33,18 @@ $ARGUMENTS
 
 3. **Derive any missing metadata from the document** (only when the corresponding flag was *not* provided):
    - **title**: first heading (`# ...`) or meaningful opening line, cleaned of markdown.
-   - **date**: first clear date in the text — `YYYY-MM-DD`, `YYYY.MM.DD`, `Month D, YYYY`, `D Month YYYY`, or bare `YYYY`. Month/day default to `01`.
+   - **date**: first clear date in the text — `YYYY-MM-DD`, `YYYY.MM.DD`, `Month D, YYYY`, `D Month YYYY`, or bare `YYYY`. Month/day default to `01`. **BCE dates**: a negative year or a `BC`/`BCE`/`BCE` suffix (e.g. `-0044-03-15`, `44-03-15 BCE`, `44 BCE`) is stored canonically as `-NNNN-MM-DD` (44 BCE → `-0044-03-15`). There is no year 0: year 0 is treated as 1 BCE.
    - **regions**: always lowercase; default `["world"]` if none detected.
    - **people**: only when names are unambiguous (or explicitly provided).
 
 4. **Validate**:
    - `title` is required.
    - `date` must include at least a year.
+   - Normalize the date to canonical form: CE `NNNN-MM-DD`, BCE `-NNNN-MM-DD` (e.g. `-0044-03-15` = 44 BCE).
    - If anything is ambiguous, ask the user before guessing.
 
 5. **Generate the filename and body**:
-   - Filename: `YYYY.MM.DD_CamelCaseTitle.md` — title converted to PascalCase with no spaces or special characters.
+   - Filename: `YYYY.MM.DD_CamelCaseTitle.md` — title converted to PascalCase with no spaces or special characters. For BCE events, prefix the year with a minus sign: `-0044.03.15_JuliusCaesarAssassination.md`.
    - Body: faithful but concise — a short summary, then key points/sections drawn from the source. Include inline `![alt](file)` images only when the source provides usable image paths.
 
 6. **Write the file** to `content/events/<filename>` (or `--out` if provided). Use the **exact** frontmatter shape below.

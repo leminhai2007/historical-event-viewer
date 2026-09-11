@@ -4,31 +4,17 @@ import matter from "gray-matter";
 import { serialize } from "next-mdx-remote/serialize";
 import rehypeUnwrapImages from "rehype-unwrap-images";
 import { ProcessedEvent } from "@/types/event";
+import {
+  formatDateDisplay,
+  normalizeDateString,
+  parseDateFromFilename,
+  sortDateKey,
+} from "./date";
 
 export const EVENTS_DIR = path.join(process.cwd(), "content", "events");
 
-export function parseDateFromFilename(filename: string): string {
-  const match = filename.match(/^(\d{4})(?:\.(\d{2}))?(?:\.(\d{2}))?/);
-  if (!match) return "";
-  const year = match[1];
-  const month = match[2] || "01";
-  const day = match[3] || "01";
-  return `${year}-${month}-${day}`;
-}
-
-export function formatDateDisplay(dateStr: string): string {
-  if (!dateStr) return "Unknown Date";
-  const parts = dateStr.split("-");
-  const year = parts[0];
-  const month = parts[1];
-  const day = parts[2];
-  if (month === "01" && day === "01") return year;
-  if (day === "01") return `${year}.${month}`;
-  return `${year}.${month}.${day}`;
-}
-
 export function extractTitleFromFilename(filename: string): string {
-  const match = filename.match(/^\d{4}(?:\.\d{2})?(?:\.\d{2})?_(.+)\.md$/);
+  const match = filename.match(/^-?\d{4}(?:\.\d{2})?(?:\.\d{2})?_(.+)\.md$/);
   if (match) {
     return match[1].replace(/([A-Z])/g, " $1").trim();
   }
@@ -46,8 +32,14 @@ export async function getAllEvents(): Promise<ProcessedEvent[]> {
       const fileContent = fs.readFileSync(filePath, "utf-8");
       const { data, content } = matter(fileContent);
 
-      const dateFromFilename = parseDateFromFilename(filename);
-      const date = data.date || dateFromFilename;
+      const filenameDate = parseDateFromFilename(filename);
+      let date: string;
+      if (data.date instanceof Date && !isNaN(data.date.getTime())) {
+        date = data.date.toISOString().slice(0, 10);
+      } else {
+        const raw = String(data.date ?? "").trim();
+        date = raw ? normalizeDateString(raw) : filenameDate;
+      }
       const title = data.title || extractTitleFromFilename(filename);
 
       const serializedContent = await serialize(content, {
@@ -70,14 +62,12 @@ export async function getAllEvents(): Promise<ProcessedEvent[]> {
           },
         },
         content,
-        parsedDate: new Date(date),
+        dateSortKey: sortDateKey(date),
         displayDate: formatDateDisplay(date),
         serializedContent,
       };
     })
   );
 
-  return events.sort(
-    (a, b) => a.parsedDate.getTime() - b.parsedDate.getTime()
-  );
+  return events.sort((a, b) => a.dateSortKey - b.dateSortKey);
 }

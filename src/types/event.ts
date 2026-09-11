@@ -21,7 +21,7 @@ export interface Event {
 }
 
 export interface ProcessedEvent extends Event {
-  parsedDate: Date;
+  dateSortKey: number;
   displayDate: string;
   serializedContent: MDXRemoteSerializeResult;
 }

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ProcessedEvent } from "@/types/event";
 import EventCard from "./EventCard";
 import EventTooltip, { EventAnchor } from "./EventTooltip";
+import { formatDateDisplay, sortDateKey } from "@/lib/date";
 
 interface TimelineProps {
   events: ProcessedEvent[];
@@ -27,8 +28,7 @@ function getRegionDotColor(region: string): string {
 }
 
 function formatKey(key: string): string {
-  const [y, m, d] = key.split("-");
-  return `${y}.${m}.${d}`;
+  return formatDateDisplay(key);
 }
 
 export default function Timeline({ events, selectedRegions }: TimelineProps) {
@@ -44,8 +44,8 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
   };
 
   const dates = useMemo(() => {
-    const keys = events.map((e) => e.metadata.date);
-    return Array.from(new Set(keys.length ? keys : [])).sort();
+    const keys = Array.from(new Set(events.map((e) => e.metadata.date)));
+    return keys.sort((a, b) => sortDateKey(a) - sortDateKey(b));
   }, [events]);
 
   const matrix = useMemo(() => {

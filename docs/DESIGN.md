@@ -88,6 +88,11 @@ YYYY.MM.DD_EventName.md
 ---
 title: "Moon Landing"                    # Required: Display name
 date: "1969-07-20"                       # Required: ISO date (YYYY-MM-DD)
+```
+BCE events use a **negative, zero-padded year**: `date: "-0044-03-15"` =
+44 BCE (year is the BCE number; there is no year 0 — 0 becomes 1 BCE). The
+file name mirrors it: `-0044.03.15_JuliusCaesarAssassination.md`. Dates are
+sorted by a numeric key (`yyyymmdd`, negative for BCE), not by `Date`.
 icon: "rocket.svg"                       # Optional: file in content/icons/
 image: "moon-landing.svg"                # Optional: file in content/images/
 tags:
@@ -147,8 +152,10 @@ interface TimelineProps {
 - Horizontally scrollable when there are more columns than fit the viewport.
 - Header row shows the region name + colored dot for each column.
 
-**Grid keys** use the raw `metadata.date` string (e.g. `1989-11-09`) to avoid
-timezone shifts from `Date` parsing.
+**Grid keys** use the raw `metadata.date` string (e.g. `1989-11-09` or
+`-0044-03-15`) to avoid timezone shifts from `Date` parsing; unique keys are
+sorted with `sortDateKey`. `src/lib/date.ts` owns parsing/formatting (BCE →
+"44 BCE").
 
 ### 2. EventCard (`EventCard.tsx`)
 
