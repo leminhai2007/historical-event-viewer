@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <title>Revolution</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fce4ec"/>
+      <stop offset="100%" stop-color="#f8bbd0"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="url(#bg)"/>
+  <path d="M58 108 h12 v-24 h-12 z" fill="#6d4c41" stroke="#4e342e" stroke-width="2"/>
+  <rect x="56" y="92" width="16" height="4" rx="2" fill="#8d6e63"/>
+  <rect x="56" y="100" width="16" height="4" rx="2" fill="#8d6e63"/>
+  <path d="M50 84 h28 l-3 8 h-22 z" fill="#8d6e63" stroke="#5d4037" stroke-width="2"/>
+  <path d="M64 30 Q48 46 48 56 A16 16 0 0 0 80 56 Q80 46 64 30 Z" fill="#ff7043"/>
+  <path d="M64 38 Q53 50 53 57 A11 11 0 0 0 75 57 Q75 50 64 38 Z" fill="#ffb74d"/>
+  <path d="M64 46 Q57 54 57 58 A7 7 0 0 0 71 58 Q71 54 64 46 Z" fill="#ffe082"/>
+</svg>

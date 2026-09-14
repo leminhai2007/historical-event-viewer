@@ -91,7 +91,7 @@ export default function TimelineApp({
   const filteredEvents = filterEventsByRegions(events, selectedRegions);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-white">
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-start justify-between gap-4">
           <div>
@@ -109,7 +109,7 @@ export default function TimelineApp({
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-4 pt-8 pb-24">
         <Timeline events={filteredEvents} selectedRegions={selectedRegions} />
       </main>
 
@@ -119,8 +119,8 @@ export default function TimelineApp({
         onSelectionChange={onSelectionChange}
       />
 
-      <footer className="border-t border-gray-100 mt-16">
-        <div className="max-w-4xl mx-auto px-4 py-6 flex items-center justify-between text-sm text-gray-500">
+      <footer className="sticky bottom-0 z-30 border-t border-gray-100 bg-white/80 backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto px-4 py-2 flex items-center justify-between gap-2 text-xs text-gray-500">
           <a
             href="https://github.com/leminhai2007/historical-event-viewer"
             target="_blank"

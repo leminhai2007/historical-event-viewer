@@ -1,5 +1,5 @@
 ---
-description: Create a new historical event Markdown file (content/<locale>/events/YYYY.MM.DD_Name.md) from a source document, URL, or pasted text using the project's event schema.
+description: Create a new historical event Markdown file (content/events/<locale>/YYYY.MM.DD_Name.md) from a source document, URL, or pasted text using the project's event schema.
 ---
 
 # Create Historical Event
@@ -26,10 +26,10 @@ $ARGUMENTS
    | `--date` | `--date 1903-12-17` | Also accepts `YYYY.MM.DD`, bare `YYYY`, or BCE (see step 3) |
    | `--region` | `--region "Thế giới"` | Repeatable; use the **display names** (with diacritics) exactly as they should appear in the region list — vi: `Thế giới`, `Châu Âu`, `Châu Á`, `Bắc Mỹ`, `Nam Mỹ`, `Châu Phi`, `Châu Đại Dương`, `Không gian`; en: `World`, `Europe`, `Asia`, `North America`, `South America`, `Africa`, `Oceania`, `Space`. Names are defined by the event files (all `.md` files are scanned to build the selector list) |
    | `--people` | `--people "Neil Armstrong"` | Repeatable |
-   | `--icon` | `--icon rocket.svg` | Filename in content/<locale>/icons/ |
-   | `--image` | `--image moon-landing.svg` | Filename in content/<locale>/images/ |
+   | `--icon` | `--icon rocket.svg` | Filename in content/icons/ (shared across all languages) |
+   | `--image` | `--image moon-landing.svg` | Filename in content/images/ (shared across all languages) |
    | `--locale` | `--locale en` | Which language folder to write to. Default `vi` (the site's default). The event should exist in **each** language it should be shown in |
-   | `--out` | `--out content/vi/events` | Override output directory |
+   | `--out` | `--out content/events/vi` | Override output directory |
    | `--force` | `--force` | Allow overwriting an existing file |
 
 3. **Derive any missing metadata from the document** (only when the corresponding flag was *not* provided):
@@ -48,19 +48,22 @@ $ARGUMENTS
    - Filename: `YYYY.MM.DD_CamelCaseTitle.md` — title converted to PascalCase with no spaces or special characters. For BCE events, prefix the year with a minus sign: `-0044.03.15_JuliusCaesarAssassination.md`.
    - Body: faithful but concise — a short summary, then key points/sections drawn from the source, **translated into the target locale's language**. Include inline `![alt](file)` images only when the source provides usable image paths.
 
-6. **Write the file** to `content/<locale>/events/<filename>` (or `--out` if provided). Use the **exact** frontmatter shape below. If the event is worth showing in the other language too, mention that the user may want to run the same command with `--locale <other>`.
+6. **Write the file** to `content/events/<locale>/<filename>` (or `--out` if provided). Use the **exact** frontmatter shape below. If the event is worth showing in the other language too, mention that the user may want to run the same command with `--locale <other>`.
 
 7. **Verify the asset files** exist:
-   - Icon at `content/<locale>/icons/<icon>` (default `scroll.svg` — already present in each locale).
-   - Image at `content/<locale>/images/<image>` if `--image` was given.
-   - Warn if they are missing. Event assets live under `content/<locale>/` (not `public/`); they are served to the app by the route handler at `/content/<locale>/...`.
+   - Icon at `content/icons/<icon>` (default `scroll.svg` — already present).
+   - Image at `content/images/<image>` if `--image` was given.
+   - Warn if they are missing. Icons/images are **shared across languages** and
+     live under `content/icons/` / `content/images/` (not `public/`, and not
+     per-locale); they are served to the app by the route handler at
+     `/content/icons/<file>` and `/content/images/<file>`.
 
 8. **Do not overwrite** an existing file unless `--force` was provided.
 
 9. Finish by reading back the written file to confirm it parses correctly, and print a summary:
 
    ```
-   ✔ Created content/vi/events/1867.03.30_MuaAlaska.md
+   ✔ Created content/events/vi/1867.03.30_MuaAlaska.md
      title:   Mua Alaska
      date:    1867-03-30
      locale:  vi
@@ -86,4 +89,4 @@ tags:
 ---
 ```
 
-See existing files in `content/vi/events/*.md` and `content/en/events/*.md` and `docs/DESIGN.md` for real examples. Region **display names** differ per language — never mix English names (e.g. `World`) into a vi file or Vietnamese names (e.g. `Thế giới`) into an en file.
+See existing files in `content/events/vi/*.md` and `content/events/en/*.md` and `docs/DESIGN.md` for real examples. Region **display names** differ per language — never mix English names (e.g. `World`) into a vi file or Vietnamese names (e.g. `Thế giới`) into an en file.

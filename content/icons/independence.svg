@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <title>Independence</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e3f2fd"/>
+      <stop offset="100%" stop-color="#bbdefb"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="url(#bg)"/>
+  <rect x="30" y="52" width="26" height="34" rx="13" fill="none" stroke="#78909c" stroke-width="7" transform="rotate(-6 43 69)"/>
+  <rect x="72" y="52" width="26" height="34" rx="13" fill="none" stroke="#78909c" stroke-width="7" transform="rotate(8 85 69)"/>
+  <g stroke="#ef5350" stroke-width="4" stroke-linecap="round" fill="none">
+    <path d="M58 58 l8 8 M66 58 l-8 8"/>
+  </g>
+  <g stroke="#fdd835" stroke-width="4" stroke-linecap="round">
+    <path d="M64 24v10 M59 29h10"/>
+  </g>
+  <g stroke="#fdd835" stroke-width="4" stroke-linecap="round">
+    <path d="M84 90v10 M79 95h10"/>
+  </g>
+</svg>

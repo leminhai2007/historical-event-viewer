@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <title>Founding</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbe9e7"/>
+      <stop offset="100%" stop-color="#ffccbc"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="url(#bg)"/>
+  <path d="M52 26 L64 16 L76 26 Z" fill="#8d6e63" stroke="#5d4037" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M46 26 h36 v7 h-36 z" fill="#a1887f" stroke="#8d6e63" stroke-width="1.5"/>
+  <rect x="42" y="33" width="44" height="6" fill="#8d6e63"/>
+  <g fill="#bcaaa4" stroke="#8d6e63" stroke-width="1.5">
+    <rect x="46" y="39" width="6" height="24"/>
+    <rect x="55" y="39" width="6" height="24"/>
+    <rect x="64" y="39" width="6" height="24"/>
+    <rect x="73" y="39" width="6" height="24"/>
+  </g>
+  <rect x="40" y="63" width="48" height="8" fill="#8d6e63"/>
+  <rect x="34" y="71" width="60" height="8" fill="#a1887f"/>
+  <rect x="28" y="79" width="72" height="8" fill="#bcaaa4"/>
+  <path d="M64 22 l2.2 4.6 5 .6-3.7 3.5 1 5-4.5-2.4-4.5 2.4 1-5-3.7-3.5 5-.6z" fill="#fdd835" stroke="#f9a825" stroke-width="1"/>
+</svg>

@@ -34,9 +34,9 @@ itself when you change a file, so keep the terminal running and just refresh.
 ## Add or edit an event (you don't need to be a developer)
 
 The site is bilingual (**Vietnamese** is the default, **English** is
-available via the language switcher). Each language has its own content
-folder under **`content/`**: `content/vi/` for Vietnamese and `content/en/`
-for English. Each event is one text file in that language's `events/` folder:
+available via the language switcher). Each language has its own events folder:
+`content/events/vi/` for Vietnamese and `content/events/en/` for English.
+Each event is one text file in that language's folder:
 
 ```md
 ---
@@ -56,9 +56,8 @@ Chuyến bay Apollo 11 là chuyến bay vũ trụ đầu tiên đưa con ngườ
 
 ### Rules
 
-- **Language folder:** put the file in `content/vi/events/` for Vietnamese
-  or `content/en/events/` for English. Icons and images go in the matching
-  `content/<language>/icons/` and `content/<language>/images/` folders.
+- **Language folder:** put the file in `content/events/vi/` for Vietnamese
+  or `content/events/en/` for English.
 - **File name:** start with the date, then an underscore and the event name,
   for example `1969-07-20_MoonLanding.md`. Dates use `YYYY.MM.DD`.
 - **`title`** — the name shown on the event card, in that language.
@@ -67,10 +66,11 @@ Chuyến bay Apollo 11 là chuyến bay vũ trụ đầu tiên đưa con ngườ
   `"-0044-03-15"` and the file is `-0044.03.15_JuliusCaesarAssassination.md`.
   These are shown as "44 BCE" (or "44 TCN" in Vietnamese) on the timeline and
   appear before CE events.
-- **`icon`** — a small picture used on the card. The file goes in the
-  `content/<language>/icons/` folder.
-- **`image`** — (optional) a bigger picture shown in the event popup. The file
-  goes in the `content/<language>/images/` folder.
+- **`icon`** — a small picture used on the card. Icons are **shared by all
+  languages**: the file goes in the `content/icons/` folder.
+- **`image`** — (optional) a bigger picture shown in the event popup. Images
+  are **shared by all languages**: the file goes in the `content/images/`
+  folder.
 - **`tags.region`** — at least one region name, written as the **display name
   with accents** exactly as it should appear in the region list (e.g.
   `Thế giới`, `Châu Âu`, `Bắc Mỹ` in Vietnamese; `World`, `Europe`,
@@ -94,8 +94,8 @@ This project uses a **Pull Request** workflow so every change is checked by
 someone before it goes live.
 
 1. **Make your changes** — add or edit the event files in
-   `content/<language>/events/` (and any icons or images in that language's
-   `content/<language>/icons/` / `content/<language>/images/` folders).
+   `content/events/<language>/` (and, if you add new artwork, its icon in the
+   shared `content/icons/` folder or image in `content/images/`).
 2. **Create a pull request (PR)** — this asks for your changes to be added to
    the `main` branch.
 3. **Someone reviews it** — a reviewer looks over the change, asks questions
@@ -129,8 +129,9 @@ The site is a static export run through GitHub Pages:
 Each language is a folder under `content/` plus an entry in
 `content/config.json` — no code changes needed.
 
-1. Create `content/<locale>/events/`, `content/<locale>/icons/`,
-   `content/<locale>/images/` and translate/copy the event files.
+1. Create `content/events/<locale>/` and translate the event files. Icons and
+   images are shared: put new artwork in `content/icons/` or `content/images/`
+   (reused across all languages) instead of per-locale folders.
 2. In `content/config.json`:
    - `defaultLocale` — which language builds at `/` (change with care).
    - `localeOrder` — add the new locale; other locales build at `/<locale>/`
@@ -147,8 +148,9 @@ Each language is a folder under `content/` plus an entry in
 
 ```
 content/config.json     ← locale config (default language, default region per locale)
-content/vi/             ← Vietnamese content (default locale): events/ icons/ images/
-content/en/             ← English content: events/ icons/ images/
+content/events/         ← event files: events/vi/ and events/en/
+content/icons/          ← shared event icons (all languages)
+content/images/         ← shared event images (all languages)
 public/                 ← website icons, manifest, service worker
 src/                    ← the website's code (React/Next.js)
 .github/workflows/      ← automatic build + deploy to GitHub Pages

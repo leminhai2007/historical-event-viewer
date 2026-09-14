@@ -13,7 +13,7 @@ import {
 import { getConfig } from "./config";
 
 export function eventsDir(locale: string): string {
-  return path.join(process.cwd(), "content", locale, "events");
+  return path.join(process.cwd(), "content", "events", locale);
 }
 
 export function extractTitleFromFilename(filename: string): string {

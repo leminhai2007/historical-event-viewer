@@ -20,9 +20,9 @@ interface EventTooltipProps {
 }
 
 export default function EventTooltip({ event, anchor, onClose }: EventTooltipProps) {
-  const { locale, t, regionLabel } = useLocale();
+  const { t, regionLabel } = useLocale();
   const imagePath = event.metadata.image
-    ? contentUrl(locale, `images/${event.metadata.image}`)
+    ? contentUrl(`images/${event.metadata.image}`)
     : null;
 
   const panelRef = useRef<HTMLDivElement>(null);

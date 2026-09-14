@@ -4,7 +4,8 @@
 
 A responsive Progressive Web App (PWA) that renders historical events as a
 multi-column timeline. Content is **localized by language folders**:
-`content/<locale>/` holds that language's `events/`, `icons/`, and `images/`.
+`content/events/<locale>/` holds that language's event files. Event icons and
+images are **shared across languages** in `content/icons/` and `content/images/`.
 Users pick which regions to display; each selected region becomes its own
 column. Clicking an event card opens a detail modal.
 
@@ -36,20 +37,17 @@ historical-event-viewer/
 │   └── favicon.ico
 ├── content/
 │   ├── config.json               # locale config (default, order, names, region labels)
-│   ├── vi/                       # Vietnamese content (default locale)
-│   │   ├── events/               # Markdown event files (YYYY.MM.DD_Name.md)
-│   │   ├── icons/                # Event icons (SVG)
-│   │   └── images/               # Event images (SVG)
-│   └── en/                       # English content
-│       ├── events/
-│       ├── icons/
-│       └── images/
+│   ├── events/                   # Localized event Markdown files
+│   │   ├── vi/                   #   Vietnamese (default locale)
+│   │   └── en/                   #   English
+│   ├── icons/                    # Shared event icons (SVG) - all locales
+│   └── images/                   # Shared event images (SVG) - all locales
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx            # Root layout: fonts, PWA meta, LocaleProvider
 │   │   ├── page.tsx              # Server Component for the default locale (`/`)
 │   │   ├── [locale]/page.tsx     # Server Component for other locales (`/en/`)
-│   │   ├── content/[...path]/route.ts  # Serves files from content/<locale>/ (icons, images)
+│   │   ├── content/[...path]/route.ts  # Serves files from content/ (icons, images)
 │   │   └── globals.css           # Tailwind + custom styles/animations
 │   ├── components/
 │   │   ├── LocaleProvider.tsx    # Resolves locale, provides useLocale/useT/useRegionLabel
@@ -65,7 +63,7 @@ historical-event-viewer/
 │   │   ├── i18n.ts               # UI string dictionaries per locale
 │   │   ├── events.ts             # Locale-aware MD parsing + MDX serialization
 │   │   ├── date.ts               # Locale-aware date parsing/formatting (TCN/BCE)
-│   │   ├── paths.ts              # Locale content URL helpers (contentUrl)
+│   │   ├── paths.ts              # Content URL helpers (contentUrl)
 │   │   └── regions.ts            # Region extraction/filtering helpers
 │   └── types/
 │       └── event.ts              # TypeScript interfaces
@@ -105,8 +103,8 @@ BCE events use a **negative, zero-padded year**: `date: "-0044-03-15"` =
 44 BCE (year is the BCE number; there is no year 0 — 0 becomes 1 BCE). The
 file name mirrors it: `-0044.03.15_JuliusCaesarAssassination.md`. Dates are
 sorted by a numeric key (`yyyymmdd`, negative for BCE), not by `Date`.
-icon: "rocket.svg"                       # Optional: file in content/<locale>/icons/
-image: "moon-landing.svg"                # Optional: file in content/<locale>/images/
+icon: "rocket.svg"                       # Optional: file in content/icons/
+image: "moon-landing.svg"                # Optional: file in content/images/
 tags:
   region: ["World", "Space"]                # Required: display names as authored
   people: ["Neil Armstrong"]             # Optional: related people
@@ -117,12 +115,14 @@ tags:
 
 Standard Markdown rendered below the frontmatter. Images referenced by bare
 filename (e.g. `![Alt](moon-landing.svg)`) are resolved to
-`content/<locale>/images/<filename>` by `MDXContent`. Full URLs and
-`/`-prefixed paths are left untouched. Event icons/images live under
-`content/<locale>/` (not `public/`) and are served by the catch-all route
-handler `src/app/content/[...path]/route.ts`, whose first path segment selects
-the locale. Use the opencode command `/create-event` to scaffold a new event
-from a document, URL, or pasted text.
+`content/images/<filename>` by `MDXContent`. Full URLs and
+`/`-prefixed paths are left untouched. Event icons/images are **shared across
+languages** and live under `content/icons/` and `content/images/` (not
+`public/`, and not per-locale) — any event in any language references the same
+file. They are served by the catch-all route handler
+`src/app/content/[...path]/route.ts` at `/content/icons/...` and
+`/content/images/...`. Use the opencode command `/create-event` to scaffold a
+new event from a document, URL, or pasted text.
 
 ## Internationalization
 
@@ -151,7 +151,7 @@ from a document, URL, or pasted text.
   region selector list.
 - `src/lib/config.ts` reads this at build time (server-side, cached; the
   client shell also passes relevant bits through). Adding a language means
-  adding a `content/<locale>/` folder and a config entry — no code changes.
+  adding a `content/events/<locale>/` folder and a config entry — no code changes.
 
 ### Locale plumbing
 
@@ -175,7 +175,7 @@ from a document, URL, or pasted text.
 ## Rendering Architecture
 
 ```
-content/<locale>/events/*.md
+content/events/<locale>/*.md
    │  gray-matter + next-mdx-remote/serialize (rehype-unwrap-images)
    ▼
 src/lib/events.ts  ──►  ProcessedEvent[] (server, build time / static, per locale)

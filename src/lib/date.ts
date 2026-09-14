@@ -71,7 +71,7 @@ export function formatDateDisplay(dateStr: string, locale = "en"): string {
   const p = (n: number) => String(n).padStart(2, "0");
   const yearLabel = parts.bce
     ? `${Math.abs(parts.year)} ${era.bce}`
-    : String(parts.year).padStart(4, "0");
+    : String(parts.year);
   if (parts.month === 1 && parts.day === 1) return yearLabel;
   if (parts.day === 1) return `${yearLabel} ${p(parts.month)}`;
   return `${yearLabel} ${p(parts.month)}.${p(parts.day)}`;
