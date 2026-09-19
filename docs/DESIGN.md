@@ -222,6 +222,13 @@ interface TimelineProps {
 - Header row shows the region name + colored dot for each column. Dot colors
   are assigned deterministically from a hash of the region name (region names
   are free-form display strings, so there is no slug → color mapping).
+- On long timelines the header row is pinned: once it scrolls under the app's
+  sticky `<header>`, a fixed clone of the row floats just below it (z-30).
+  `position: sticky` alone cannot be used because the grid's
+  `overflow-x-auto` wrapper introduces its own horizontal scrollport; the
+  clone mirrors the container's `scrollLeft` via a translate so columns stay
+  aligned. The clone is re-synced on scroll/resize (rAF-throttled) and hidden
+  again when scrolling back to the top.
 
 **Grid keys** use the raw `metadata.date` string (e.g. `1989-11-09` or
 `-0044-03-15`) to avoid timezone shifts from `Date` parsing; unique keys are

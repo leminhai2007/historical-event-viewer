@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ProcessedEvent } from "@/types/event";
 import EventCard from "./EventCard";
 import EventTooltip, { EventAnchor } from "./EventTooltip";
@@ -41,6 +41,65 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
     event: ProcessedEvent;
     anchor: EventAnchor;
   } | null>(null);
+
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const headerCellRef = useRef<HTMLDivElement>(null);
+  const pinnedBarRef = useRef<HTMLDivElement>(null);
+  const pinnedGridRef = useRef<HTMLDivElement>(null);
+  const rafId = useRef(0);
+  const [pin, setPin] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    visible: boolean;
+  } | null>(null);
+
+  // The header row lives inside an `overflow-x-auto` container, which creates
+  // its own scrollport and breaks plain `position: sticky` against the window.
+  // So we pin a fixed-position clone of the header row once it scrolls under
+  // the app's sticky `<header>`, and translate it with the container's
+  // horizontal scroll so it stays aligned with the region columns.
+  const syncPinnedHeader = useCallback(() => {
+    cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => {
+      const container = timelineRef.current;
+      const header = headerCellRef.current;
+      if (!container || !header) return;
+      const siteHeader = document.querySelector<HTMLElement>("header");
+      const containerRect = container.getBoundingClientRect();
+      const headerRect = header.getBoundingClientRect();
+      const top = siteHeader ? siteHeader.getBoundingClientRect().bottom : 0;
+      const next = {
+        left: containerRect.left,
+        top,
+        width: containerRect.width,
+        visible: headerRect.bottom < top,
+      };
+      setPin((prev) =>
+        prev &&
+        prev.left === next.left &&
+        prev.top === next.top &&
+        prev.width === next.width &&
+        prev.visible === next.visible
+          ? prev
+          : next
+      );
+      if (pinnedGridRef.current) {
+        pinnedGridRef.current.style.transform = `translateX(${-container.scrollLeft}px)`;
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    syncPinnedHeader();
+    window.addEventListener("scroll", syncPinnedHeader, true);
+    window.addEventListener("resize", syncPinnedHeader);
+    return () => {
+      window.removeEventListener("scroll", syncPinnedHeader, true);
+      window.removeEventListener("resize", syncPinnedHeader);
+      cancelAnimationFrame(rafId.current);
+    };
+  }, [syncPinnedHeader]);
 
   const toggleTooltip = (event: ProcessedEvent, anchor: EventAnchor) => {
     setActive((prev) =>
@@ -91,7 +150,7 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
   }
 
   return (
-    <div className="overflow-x-auto pb-8">
+    <div ref={timelineRef} className="overflow-x-auto pb-8">
       <div
         className="grid"
         style={{
@@ -99,7 +158,7 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
         }}
       >
         {/* Header row */}
-        <div className="border-b border-gray-200" />
+        <div ref={headerCellRef} className="border-b border-gray-200" />
         {selectedRegions.map((region) => (
           <div
             key={region}
@@ -143,6 +202,45 @@ export default function Timeline({ events, selectedRegions }: TimelineProps) {
             ))}
           </div>
         ))}
+      </div>
+
+      {/* Pinned region header (visible only while scrolled down) */}
+      <div
+        ref={pinnedBarRef}
+        className="fixed z-30"
+        style={{
+          left: pin?.left ?? 0,
+          top: pin?.top ?? 0,
+          width: pin?.width ?? 0,
+          visibility: pin?.visible ? "visible" : "hidden",
+          pointerEvents: "none",
+        }}
+        aria-hidden="true"
+      >
+        <div className="overflow-hidden bg-white border-b border-gray-200 shadow-sm">
+          <div
+            ref={pinnedGridRef}
+            className="grid"
+            style={{
+              gridTemplateColumns: `130px repeat(${selectedRegions.length}, minmax(170px, 230px))`,
+            }}
+          >
+            <div className="border-b border-gray-200" />
+            {selectedRegions.map((region) => (
+              <div
+                key={region}
+                className="border-b border-gray-200 px-3 pb-3 flex items-center justify-center gap-1.5"
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${getRegionDotColor(region)}`}
+                />
+                <span className="text-sm font-semibold text-gray-700">
+                  {regionLabel(region)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Click-away backdrop + tooltip */}
